@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function BookList(props: {
     books:any,
-    shelfs: any,
+    shelves: any,
     BookState: any,
     beautifyShelf: any,
     updateBookShelf: any,
@@ -16,7 +16,7 @@ export default function BookList(props: {
             <h1>MyReads</h1>
         </div>
         <div className="list-books-content">
-            {props.shelfs.filter((s) => s !== props.BookState.None).map((shelf) => (
+            {props.shelves.filter((s) => s !== props.BookState.None).map((shelf) => (
                 <div key={shelf}>
                     <div className="bookshelf">
                         <h2 className="bookshelf-title">{props.beautifyShelf(shelf)}</h2>
@@ -42,7 +42,7 @@ export default function BookList(props: {
                                                         <option value="none" disabled>
                                                             Move to...
                                                         </option>
-                                                        {props.shelfs.map((s) => (
+                                                        {props.shelves.map((s) => (
                                                             <option key={s} value={s}>
                                                                 {props.beautifyShelf(s)}
                                                             </option>

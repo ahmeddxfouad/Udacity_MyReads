@@ -1,45 +1,60 @@
 import  { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { search } from "./BooksAPI";
 
 export default function Search( props: {
     books:any,
-    shelfs: any,
+    shelves: any,
     beautifyShelf: any,
     updateBookShelf: any,
+    currentBooks: any,
+    BooksState: any,
 }){
     const [searchedBooks, setSearchedBooks] = useState([]);
     const navigate = useNavigate();
 
+    useEffect( () => {
+        let s = searchedBooks.map( (book) => {
+            let bookShelf = getBookShelf(book);
+            return {...book, shelf: bookShelf}
+        });
+        console.log('s: ', s);
+        setSearchedBooks(s);
+    }, [props.books])
+
     const searchBooks = async (query) => {
+        query = query.target.value;
         if (!query) {
             setSearchedBooks([]);
             return;
         }
         try {
             const searched = await search(query);
-            // setCurrentAvaialable(books.filter((b) => b.title.includes(query) ? b : null));
-            // console.log('curravailable: ', curravailable)
             if (searched.error) {
                 setSearchedBooks([]);
             } else {
-                console.log('searched: ',query, ' ', searched)
-                setSearchedBooks(searched);
+                let s = searched.map( (book) => {
+                    let bookShelf = getBookShelf(book);
+                        return {...book, shelf: bookShelf}
+                });
+                console.log('s: ', s);
+                setSearchedBooks(s);
             }
         } catch (error) {
             console.error('Failed to search books:', error);
             setSearchedBooks([]);
         }
     };
-    const getBookShelf =(book) => {
-        let foundBook = props.books.filter((b) => b.id === book.id);
-        console.log('foundBook: ',foundBook)
-        if(foundBook){
-            return foundBook.shelf
-        }else{
-            return "none";
+
+    const getBookShelf = (book) => {
+        let foundBook = props.books.find((b) => b.id === book.id);
+        if (foundBook) {
+            return foundBook.shelf;
+        } else {
+            return props.BooksState.None;
         }
     }
+
 
     return (
         <div className="search-books">
@@ -54,7 +69,7 @@ export default function Search( props: {
                     <input
                         type="text"
                         placeholder="Search by title, author, or ISBN"
-                        onChange={(e) => searchBooks(e.target.value)}
+                        onChange={searchBooks}
                     />
                 </div>
             </div>
@@ -74,13 +89,13 @@ export default function Search( props: {
                                     ></div>
                                     <div className="book-shelf-changer">
                                         <select
-                                            value={getBookShelf(book)}
+                                            value={book.shelf ? book.shelf : props.BooksState.None}
                                             onChange={(e) => props.updateBookShelf(book, e.target.value)}
                                         >
-                                            <option value="none" disabled>
+                                            <option value="move" disabled>
                                                 Move to...
                                             </option>
-                                            {props.shelfs.map((s) => (
+                                            {props.shelves.map((s) => (
                                                 <option key={s} value={s}>
                                                     {props.beautifyShelf(s)}
                                                 </option>
@@ -89,7 +104,7 @@ export default function Search( props: {
                                     </div>
                                 </div>
                                 <div className="book-title">{book.title}</div>
-                                <div className="book-authors">{book.authors.join(', ')}</div>
+                                <div className="book-authors">{book.authors ? book.authors.join(', ') : ''}</div>
                             </div>
                         </li>
                     ))}
